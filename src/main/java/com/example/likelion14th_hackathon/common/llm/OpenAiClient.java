@@ -1,39 +1,53 @@
 package com.example.likelion14th_hackathon.common.llm;
 
+import com.example.likelion14th_hackathon.common.exception.ExternalApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 import java.util.List;
 import java.util.Map;
 
 @Component
-@ConditionalOnProperty(name = "llm.provider", havingValue = "openai", matchIfMissing = true)
+@ConditionalOnProperty(name = "llm.provider", havingValue = "openai")
 public class OpenAiClient implements LlmClient {
-//    OpenAiClient는 LlmClient 인터페이스를 구현한다.
-//그래서 ask(String prompt) 메서드를 반드시 가져야 한다.
-//서비스에서는 LlmClient 타입으로 공통 사용이 가능하다.
-// 이 구조 덕분에 OpenAI → Qwen → Claude로 바꿔도 서비스 코드를 안 바꿔도 된다.
 
     private final RestClient restClient;
     private final String apiKey;
-    private final String model;
+    private final String fastModel;
+    private final String reasoningModel;
 
     public OpenAiClient(
             RestClient.Builder restClientBuilder,
             @Value("${llm.openai.api-key:}") String apiKey,
-            @Value("${llm.openai.model:gpt-4o-mini}") String model
+            @Value("${llm.openai.fast-model:gpt-4o-mini}") String fastModel,
+            @Value("${llm.openai.reasoning-model:gpt-5.5}") String reasoningModel
     ) {
         this.restClient = restClientBuilder
                 .baseUrl("https://api.openai.com")
                 .build();
         this.apiKey = apiKey;
-        this.model = model;
+        this.fastModel = fastModel;
+        this.reasoningModel = reasoningModel;
     }
 
     @Override
-    public String ask(String prompt) {
+    public String askFast(String prompt) {
+        return askWithModel(fastModel, prompt);
+    }
+
+    @Override
+    public String askReasoning(String prompt) {
+        return askWithModel(reasoningModel, prompt);
+    }
+
+    private String askWithModel(String model, String prompt) {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new ExternalApiException("OpenAI API Key가 설정되지 않았습니다. 프로젝트 루트의 .env 파일에 OPENAI_API_KEY를 입력해주세요.");
+        }
+
         Map<String, Object> requestBody = Map.of(
                 "model", model,
                 "messages", List.of(
@@ -44,18 +58,22 @@ public class OpenAiClient implements LlmClient {
                 )
         );
 
-        OpenAiResponse response = restClient.post()
-                .uri("/v1/chat/completions")
-                .header("Authorization", "Bearer " + apiKey)
-                .body(requestBody)
-                .retrieve()
-                .body(OpenAiResponse.class);
+        try {
+            OpenAiResponse response = restClient.post()
+                    .uri("/v1/chat/completions")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .body(requestBody)
+                    .retrieve()
+                    .body(OpenAiResponse.class);
 
-        if (response == null || response.choices() == null || response.choices().isEmpty()) {
-            return "";
+            if (response == null || response.choices() == null || response.choices().isEmpty()) {
+                throw new ExternalApiException("OpenAI 응답이 비어 있습니다.");
+            }
+
+            return response.choices().get(0).message().content();
+        } catch (RestClientException e) {
+            throw new ExternalApiException("OpenAI 호출에 실패했습니다. 모델명 또는 API Key를 확인해주세요. model=" + model);
         }
-
-        return response.choices().get(0).message().content();
     }
 
     private record OpenAiResponse(List<OpenAiChoice> choices) {

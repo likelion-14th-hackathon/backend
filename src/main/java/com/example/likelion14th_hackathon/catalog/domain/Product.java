@@ -31,6 +31,8 @@ public class Product {
     @Column(length = 100)
     private String material;
 
+    // 추천 시스템에서 사용하는 패션 스타일 분류다.
+    // 예: 비즈니스 캐주얼, 오피스/포멀, 스트릿, 미니멀
     @Column(name = "style_category", length = 100)
     private String styleCategory;
 

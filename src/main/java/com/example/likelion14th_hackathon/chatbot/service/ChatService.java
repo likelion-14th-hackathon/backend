@@ -3,6 +3,7 @@ package com.example.likelion14th_hackathon.chatbot.service;
 import com.example.likelion14th_hackathon.catalog.domain.Product;
 import com.example.likelion14th_hackathon.catalog.repository.ProductRepository;
 
+import com.example.likelion14th_hackathon.catalog.service.ProductPromptContextBuilder;
 import com.example.likelion14th_hackathon.common.chat.domain.ChatMessage;
 import com.example.likelion14th_hackathon.common.chat.domain.ChatSession;
 import com.example.likelion14th_hackathon.common.chat.dto.ChatRequest;
@@ -25,6 +26,7 @@ public class ChatService {
     private final SessionRepository sessionRepository;
     private final ChatRepository chatRepository;
     private final LlmClient llmClient;
+    private final ProductPromptContextBuilder productPromptContextBuilder;
 
 // 세션 관리 공통 로직
     private ChatSession getOrCreateSession(Long sessionId) {
@@ -54,11 +56,23 @@ public class ChatService {
 
         // 상품 정보 조회
         Product product = productRepository.findById(productId).orElse(null);
-        String productInfo = (product != null) ? "상품명: " + product.getName() + ", 설명: " + product.getDescription() : "";
+        String productInfo = productPromptContextBuilder.buildProductContext(product);
 
         // 프롬프트 생성 및 LLM 호출
         String history = buildHistoryContext(session.getId());
-        String prompt = "당신은 친절한 쇼핑 도우미입니다.\n" + productInfo + "\n\n[대화 기록]\n" + history + "\n\n사용자: " + request.getMessage();
+        String prompt = """
+                당신은 MCM 명품/패션 상품 상담 챗봇입니다.
+                아래 상품 정보와 소재 정보를 기준으로만 답변하세요.
+                정보가 없는 필드는 추측하지 말고 "확인된 정보가 없습니다"라고 안내하세요.
+                가격, 타입, 색상, 사이즈, 스타일, 설명, 이미지, 케어 정보가 질문과 관련 있으면 함께 반영하세요.
+
+                %s
+
+                [대화 기록]
+                %s
+
+                사용자: %s
+                """.formatted(productInfo, history, request.getMessage());
 
         String aiReply = llmClient.ask(prompt);
 
@@ -73,9 +87,19 @@ public class ChatService {
     public ChatResponse processKeywordChat(Long productId, ChatRequest request) {
         ChatSession session = getOrCreateSession(request.getSessionId());
         String keyword = request.getSelectedKeyword();
+        Product product = productRepository.findById(productId).orElse(null);
+        String productInfo = productPromptContextBuilder.buildProductContext(product);
 
         // 2줄 이내 요약 프롬프트 설정
-        String prompt = "다음 키워드에 대해 명품 가죽/소품 전문가로서 핵심만 담아 2줄 이내로 아주 간결하게 설명해주세요: " + keyword;
+        String prompt = """
+                당신은 MCM 명품/패션 상품 용어를 짧게 설명하는 전문가입니다.
+                아래 상품 정보와 소재 정보를 참고해, 선택된 키워드를 2줄 이내로 아주 간결하게 설명하세요.
+                정보가 부족하면 일반론과 상품에 확인된 정보를 구분해서 답변하세요.
+
+                %s
+
+                선택된 키워드: %s
+                """.formatted(productInfo, keyword);
         String shortReply = llmClient.ask(prompt);
 
         // 키워드 질의응답 내역 저장
@@ -93,10 +117,22 @@ public class ChatService {
         chatRepository.save(new ChatMessage(request.getMessage(), "USER", session));
 
         Product product = productRepository.findById(productId).orElse(null);
-        String productInfo = (product != null) ? "상품명: " + product.getName() + ", 소재/정보: " + product.getDescription() : "";
+        String productInfo = productPromptContextBuilder.buildProductContext(product);
 
         String history = buildHistoryContext(session.getId());
-        String prompt = "당신은 제품 관리 전문가입니다. 소재에 맞는 올바른 관리법을 안내해주세요.\n" + productInfo + "\n\n[대화 기록]\n" + history + "\n\n사용자: " + request.getMessage();
+        String prompt = """
+                당신은 MCM 명품/패션 제품 관리 전문가입니다.
+                아래 상품 정보와 소재 정보의 careInfo, careSummary, cleaningMethod, storageMethod, avoidList, waterWarning, repairRecommendation을 우선 기준으로 답변하세요.
+                상품의 productType, color, clothsize, bagsize, styleCategory도 관리 안내에 필요하면 반영하세요.
+                확인되지 않은 소재나 관리법은 단정하지 말고 전문 수선점 확인을 권하세요.
+
+                %s
+
+                [대화 기록]
+                %s
+
+                사용자: %s
+                """.formatted(productInfo, history, request.getMessage());
 
         String aiReply = llmClient.ask(prompt);
         chatRepository.save(new ChatMessage(aiReply, "ASSISTANT", session));

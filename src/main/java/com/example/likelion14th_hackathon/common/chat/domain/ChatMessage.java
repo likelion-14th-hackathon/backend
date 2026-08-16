@@ -16,6 +16,7 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
     private String role; // USER/ASSISTANT
     private LocalDateTime createdAt;

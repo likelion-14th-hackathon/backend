@@ -4,9 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 
@@ -25,11 +28,21 @@ public class Product {
     @Column(nullable = false)
     private Integer price;
 
+    @Column(name = "product_type", length = 50)
+    private String productType;
+
     @Column(length = 50)
     private String color;
 
-    @Column(length = 100)
-    private String material;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "material_id")
+    private MaterialInfo material;
+
+    @Column(name = "clothsize")
+    private Integer clothsize;
+
+    @Column(name = "bagsize", length = 50)
+    private String bagsize;
 
     @Column(name = "style_category", length = 100)
     private String styleCategory;
@@ -39,6 +52,9 @@ public class Product {
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;
+
+    @Column(name = "care_info", columnDefinition = "TEXT")
+    private String careInfo;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -50,19 +66,27 @@ public class Product {
     public Product(
             String name,
             Integer price,
+            String productType,
             String color,
-            String material,
+            MaterialInfo material,
+            Integer clothsize,
+            String bagsize,
             String styleCategory,
             String description,
-            String imageUrl
+            String imageUrl,
+            String careInfo
     ) {
         this.name = name;
         this.price = price;
+        this.productType = productType;
         this.color = color;
         this.material = material;
+        this.clothsize = clothsize;
+        this.bagsize = bagsize;
         this.styleCategory = styleCategory;
         this.description = description;
         this.imageUrl = imageUrl;
+        this.careInfo = careInfo;
     }
 
     public Long getId() {
@@ -77,12 +101,24 @@ public class Product {
         return price;
     }
 
+    public String getProductType() {
+        return productType;
+    }
+
     public String getColor() {
         return color;
     }
 
-    public String getMaterial() {
+    public MaterialInfo getMaterial() {
         return material;
+    }
+
+    public Integer getClothsize() {
+        return clothsize;
+    }
+
+    public String getBagsize() {
+        return bagsize;
     }
 
     public String getStyleCategory() {
@@ -97,6 +133,10 @@ public class Product {
         return imageUrl;
     }
 
+    public String getCareInfo() {
+        return careInfo;
+    }
+
     public ProductStatus getStatus() {
         return status;
     }
@@ -104,18 +144,26 @@ public class Product {
     public void updateDetail(
             String name,
             Integer price,
+            String productType,
             String color,
-            String material,
+            MaterialInfo material,
+            Integer clothsize,
+            String bagsize,
             String styleCategory,
             String description,
-            String imageUrl
+            String imageUrl,
+            String careInfo
     ) {
         this.name = name;
         this.price = price;
+        this.productType = productType;
         this.color = color;
         this.material = material;
+        this.clothsize = clothsize;
+        this.bagsize = bagsize;
         this.styleCategory = styleCategory;
         this.description = description;
         this.imageUrl = imageUrl;
+        this.careInfo = careInfo;
     }
 }

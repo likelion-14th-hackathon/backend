@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/chatbot/session")
+@RequestMapping("/chatbot/session")
 @RequiredArgsConstructor
 public class ChatSessionController {
     private final ChatSessionService chatSessionService;
@@ -33,7 +33,7 @@ public class ChatSessionController {
     public ResponseEntity<ApiResponse<Void>> deleteSession(@PathVariable Long sessionId) {
         try {
             chatSessionService.deleteSession(sessionId);
-            return ResponseEntity.ok(ApiResponse.success(null, "세션을 성공적으로 삭제했습니다."));
+            return ResponseEntity.ok(ApiResponse.success(null, "세션이 성공적으로 삭제되었습니다."));
         } catch (ChatSessionNotFoundException exception) {
             return ResponseEntity.status(404).body(ApiResponse.failure(404, "삭제할 세션을 찾을 수 없습니다."));
         }

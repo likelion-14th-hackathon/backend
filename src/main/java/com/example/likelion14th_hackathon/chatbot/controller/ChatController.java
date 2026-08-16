@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/products/{productId}/chatbot")
+@RequestMapping("/products/{productId}/chatbot")
 @RequiredArgsConstructor
 public class ChatController {
 

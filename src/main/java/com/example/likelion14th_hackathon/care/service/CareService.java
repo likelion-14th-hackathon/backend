@@ -4,6 +4,8 @@ import com.example.likelion14th_hackathon.catalog.domain.OwnedProduct;
 import com.example.likelion14th_hackathon.catalog.repository.OwnedProductRepository;
 import com.example.likelion14th_hackathon.catalog.service.ProductPromptContextBuilder;
 import com.example.likelion14th_hackathon.care.dto.WeatherInfo;
+import com.example.likelion14th_hackathon.common.api.ResourceNotFoundException;
+import com.example.likelion14th_hackathon.common.api.UnauthorizedException;
 import com.example.likelion14th_hackathon.common.chat.domain.ChatMessage;
 import com.example.likelion14th_hackathon.common.chat.domain.ChatSession;
 import com.example.likelion14th_hackathon.common.chat.dto.ChatRequest;
@@ -39,7 +41,7 @@ public class CareService {
     }
 
     @Transactional
-    public ChatResponse processCareChat(Long userProductId, ChatRequest request) {
+    public ChatResponse processCareChat(Long memberId, Long userProductId, ChatRequest request) {
         // 세션 조회 또는 생성 (새로고침/재접속 대응)
         ChatSession session = chatSessionService.getOrCreate(request.getSessionId());
 
@@ -47,7 +49,7 @@ public class CareService {
         chatRepository.save(new ChatMessage(request.getMessage(), "USER", session));
 
         // LLM 프롬프트 생성 및 답변 도출
-        OwnedProduct ownedProduct = ownedProductRepository.findById(userProductId).orElse(null);
+        OwnedProduct ownedProduct = getOwnedProductForMember(memberId, userProductId);
         String productContext = productPromptContextBuilder.buildOwnedProductContext(userProductId, ownedProduct);
         String history = buildHistoryContext(session.getId());
         String prompt = """
@@ -74,13 +76,13 @@ public class CareService {
     }
 
     @Transactional
-    public ChatResponse initCareChat(Long userProductId, ChatRequest request) {
+    public ChatResponse initCareChat(Long memberId, Long userProductId, ChatRequest request) {
         // 푸시 알림 클릭 진입 시 새로운 세션 발급
         ChatSession session = sessionRepository.save(new ChatSession());
 
         // 트리거 타입에 따른 맞춤형 환영 인사 생성
         String triggerType = request.getTriggerType();
-        OwnedProduct ownedProduct = ownedProductRepository.findById(userProductId).orElse(null);
+        OwnedProduct ownedProduct = getOwnedProductForMember(memberId, userProductId);
         String productContext = productPromptContextBuilder.buildOwnedProductContext(userProductId, ownedProduct);
         String triggerContext;
 
@@ -117,5 +119,16 @@ public class CareService {
         chatRepository.save(new ChatMessage(initialMessage, "ASSISTANT", session));
 
         return ChatResponse.ofInit(session.getId(), initialMessage);
+    }
+
+    private OwnedProduct getOwnedProductForMember(Long memberId, Long userProductId) {
+        OwnedProduct ownedProduct = ownedProductRepository.findById(userProductId)
+                .orElseThrow(() -> new ResourceNotFoundException("등록 제품을 찾을 수 없습니다."));
+
+        if (!ownedProduct.getMemberId().equals(memberId)) {
+            throw new UnauthorizedException("해당 등록 제품에 접근할 권한이 없습니다.");
+        }
+
+        return ownedProduct;
     }
 }

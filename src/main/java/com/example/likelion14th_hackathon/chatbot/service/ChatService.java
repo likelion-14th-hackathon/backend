@@ -100,7 +100,7 @@ public class ChatService {
 
                 선택된 키워드: %s
                 """.formatted(productInfo, keyword);
-        String shortReply = llmClient.ask(prompt);
+        String shortReply = llmClient.askFast(prompt);
 
         // 키워드 질의응답 내역 저장
         chatRepository.save(new ChatMessage("키워드 설명 요청: " + keyword, "USER", session));

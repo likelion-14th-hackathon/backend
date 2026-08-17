@@ -18,22 +18,34 @@ public class OpenAiClient implements LlmClient {
 
     private final RestClient restClient;
     private final String apiKey;
-    private final String model;
+    private final String fastModel;
+    private final String reasoningModel;
 
     public OpenAiClient(
             RestClient.Builder restClientBuilder,
             @Value("${llm.openai.api-key:}") String apiKey,
-            @Value("${llm.openai.model:gpt-4o-mini}") String model
+            @Value("${llm.openai.fast-model:gpt-4o-mini}") String fastModel,
+            @Value("${llm.openai.reasoning-model:${llm.openai.model:gpt-4o-mini}}") String reasoningModel
     ) {
         this.restClient = restClientBuilder
                 .baseUrl("https://api.openai.com")
                 .build();
         this.apiKey = apiKey;
-        this.model = model;
+        this.fastModel = fastModel;
+        this.reasoningModel = reasoningModel;
     }
 
     @Override
     public String ask(String prompt) {
+        return askWithModel(prompt, reasoningModel);
+    }
+
+    @Override
+    public String askFast(String prompt) {
+        return askWithModel(prompt, fastModel);
+    }
+
+    private String askWithModel(String prompt, String model) {
         Map<String, Object> requestBody = Map.of(
                 "model", model,
                 "messages", List.of(

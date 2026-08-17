@@ -6,8 +6,8 @@ import com.example.likelion14th_hackathon.style.entity.StyleType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class OpenAiStyleAnalyzer {
     }
 
     /** LLM 응답(JSON 문자열)에서 StyleType 목록 추출 */
-    private List<StyleType> parseStyles(String content) {
+    private List<StyleType> parseStyles(String content) throws Exception{
         String cleaned = content
                 .replaceAll("```json", "")
                 .replaceAll("```", "")

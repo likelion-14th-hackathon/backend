@@ -1,10 +1,11 @@
 package com.example.likelion14th_hackathon.recommendation.service;
 
-import com.example.likelion14th_hackathon.member.entity.Member;                           // TODO: 실제 경로 확인
-import com.example.likelion14th_hackathon.member.repository.MemberRepository;             // TODO: 실제 경로 확인
-import com.example.likelion14th_hackathon.mypage.domain.OwnedProduct;               // TODO: 실제 경로 확인
-import com.example.likelion14th_hackathon.mypage.repository.OwnedProductRepository; // TODO: 실제 경로 확인
-import com.example.likelion14th_hackathon.product.entity.Product;                         // TODO: 실제 경로 확인
+import com.example.likelion14th_hackathon.catalog.domain.Product;
+import com.example.likelion14th_hackathon.member.domain.Member;
+import com.example.likelion14th_hackathon.member.repository.MemberRepository;
+import com.example.likelion14th_hackathon.mypage.domain.OwnedProduct;
+import com.example.likelion14th_hackathon.mypage.domain.OwnershipStatus;
+import com.example.likelion14th_hackathon.mypage.repository.OwnedProductRepository;
 import com.example.likelion14th_hackathon.recommendation.dto.RecommendationResponse;
 import com.example.likelion14th_hackathon.recommendation.dto.RecommendationResponse.ProductSummary;
 import com.example.likelion14th_hackathon.recommendation.rule.TpoStyleRule;
@@ -41,8 +42,7 @@ public class RecommendationService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
-        // TODO: Member PK getter 확인 (getMemberId 가정)
-        if (!schedule.getMember().getMemberId().equals(memberId)) {
+        if (!schedule.getMember().getId().equals(memberId)) {
             throw new IllegalStateException("해당 일정에 대한 권한이 없습니다.");
         }
 
@@ -53,53 +53,51 @@ public class RecommendationService {
                     schedule.getTitle(), List.of(), List.of());
         }
 
-        // 2. 그 스타일을 가진 제품들 조회 (제품 단위로 중복 제거)
+        // 2. 그 스타일을 가진 제품 조회 (제품 단위로 중복 제거)
         List<ProductStyle> matched = productStyleRepository.findByStyleTypeIn(tpoStyles);
         Map<Long, Product> candidateMap = new LinkedHashMap<>();
         for (ProductStyle ps : matched) {
             Product p = ps.getProduct();
-            candidateMap.putIfAbsent(p.getProductId(), p);   // TODO: Product PK getter 확인
+            candidateMap.putIfAbsent(p.getProductId(), p);
         }
         List<Product> candidates = new ArrayList<>(candidateMap.values());
 
-        // 3. 회원 취향 스타일 수집 (AI 분석 결과 + 구매 내역)
+        // 3. 회원 취향 수집
+        //  (1) AI가 사진으로 분석한 스타일
         Set<StyleType> memberStyles = userStyleRepository.findByMember(member).stream()
                 .map(UserStyle::getStyleType)
                 .collect(Collectors.toSet());
 
-        // owendList는 구매 목록
-        List<OwnedProduct> ownedList = ownedProductRepository.findByMember(member);
+        //  (2) 구매 이력 전체 (양도한 것도 취향 신호로 포함)
+        List<OwnedProduct> allPurchased = ownedProductRepository.findByMember_Id(memberId);
 
-        // 구매한 제품들의 스타일도 취향 신호로 집계 (스타일별 등장 횟수)
-        // purchasedStyleCount는 스타일 별로 구매된 횟수 목록
         Map<StyleType, Long> purchasedStyleCount = new HashMap<>();
-        for (OwnedProduct op : ownedList) {
-            // TODO: OwnedProduct의 getProduct 확인
+        for (OwnedProduct op : allPurchased) {
             List<ProductStyle> styles = productStyleRepository.findByProduct(op.getProduct());
             for (ProductStyle ps : styles) {
                 purchasedStyleCount.merge(ps.getStyleType(), 1L, Long::sum);
             }
         }
 
-        // 4. 정렬: (AI 스타일 겹침) + (구매 스타일 가중치) 높은 순
+        // 4. 정렬: (AI 스타일 겹침) + (구매 스타일 횟수) 높은 순
         Map<Long, Set<StyleType>> productStyleMap = buildProductStyleMap(matched);
         candidates.sort((a, b) -> {
-            long scoreA = score(productStyleMap.get(a.getId()), memberStyles, purchasedStyleCount);
-            long scoreB = score(productStyleMap.get(b.getId()), memberStyles, purchasedStyleCount);
+            long scoreA = score(productStyleMap.get(a.getProductId()), memberStyles, purchasedStyleCount);
+            long scoreB = score(productStyleMap.get(b.getProductId()), memberStyles, purchasedStyleCount);
             return Long.compare(scoreB, scoreA);
         });
 
-        // 5. 보유 / 미보유 분리
-        Set<Long> ownedProductIds = ownedList.stream()
-                .map(op -> op.getProduct().getId())
+        // 5. 보유/미보유 분리 (현재 보유 중인 것만 "보유"로 처리)
+        Set<Long> ownedProductIds = allPurchased.stream()
+                .filter(op -> op.getStatus() == OwnershipStatus.OWNED)
+                .map(op -> op.getProduct().getProductId())
                 .collect(Collectors.toSet());
 
         List<ProductSummary> owned = new ArrayList<>();
         List<ProductSummary> notOwned = new ArrayList<>();
         for (Product p : candidates) {
-            // TODO: Product의 getName / getImageUrl 확인
-            ProductSummary summary = new ProductSummary(p.getId(), p.getName(), p.getImageUrl());
-            if (ownedProductIds.contains(p.getId())) {
+            ProductSummary summary = new ProductSummary(p.getProductId(), p.getName(), p.getImageUrl());
+            if (ownedProductIds.contains(p.getProductId())) {
                 owned.add(summary);
             } else {
                 notOwned.add(summary);
@@ -114,15 +112,13 @@ public class RecommendationService {
     private Map<Long, Set<StyleType>> buildProductStyleMap(List<ProductStyle> matched) {
         Map<Long, Set<StyleType>> map = new HashMap<>();
         for (ProductStyle ps : matched) {
-            Long pid = ps.getProduct().getId();
+            Long pid = ps.getProduct().getProductId();
             map.computeIfAbsent(pid, k -> new HashSet<>()).add(ps.getStyleType());
         }
         return map;
     }
 
-    /**
-     * 추천 점수 = (AI가 분석한 스타일과 겹침 수) + (구매 내역의 해당 스타일 횟수 합)
-     */
+    /** 추천 점수 = (AI 분석 스타일과 겹침 수) + (구매 이력의 해당 스타일 횟수 합) */
     private long score(Set<StyleType> productStyles,
                        Set<StyleType> memberStyles,
                        Map<StyleType, Long> purchasedStyleCount) {

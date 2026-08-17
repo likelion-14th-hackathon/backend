@@ -1,6 +1,7 @@
 package com.example.likelion14th_hackathon.schedule.service;
 
-import com.example.likelion14th_hackathon.member.entity.Member;
+import com.example.likelion14th_hackathon.member.domain.Member;
+import com.example.likelion14th_hackathon.member.repository.MemberRepository;
 import com.example.likelion14th_hackathon.schedule.dto.ScheduleRequest;
 import com.example.likelion14th_hackathon.schedule.dto.ScheduleResponse;
 import com.example.likelion14th_hackathon.schedule.entity.Schedule;
@@ -85,8 +86,7 @@ public class ScheduleService {
     }
 
     private void verifyOwner(Schedule schedule, Long memberId) {
-        // TODO: Member PK getter 확인 (getMemberId 가정)
-        if (!schedule.getMember().getMemberId().equals(memberId)) {
+        if (!schedule.getMember().getId().equals(memberId)) {
             throw new IllegalStateException("해당 일정에 대한 권한이 없습니다.");
         }
     }

@@ -19,7 +19,7 @@ public class HistoryResponse {
 
     public HistoryResponse(HistoryItem item, String thumbnailUrl) {
         this.historyId = item.getHistoryId();
-        this.productId = item.getProduct().getProductId();
+        this.productId = item.getOwnedProduct().getId();
         this.historyItemType = item.getHistoryItemType();
         this.title = item.getTitle();
         this.thumbnailUrl = thumbnailUrl;

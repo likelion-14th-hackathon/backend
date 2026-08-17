@@ -10,19 +10,28 @@ server:
 spring:
   config:
     import: optional:file:.env[.properties]
+#  datasource:
+#    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:likelion14th_hackathon}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    username: ${DB_USERNAME:root}
+#    password: ${DB_PASSWORD:}
+#  jpa:
+#    hibernate:
+#      ddl-auto: ${JPA_DDL_AUTO:update}
+#    properties:
+#      hibernate:
+#        format_sql: true
+#        dialect: org.hibernate.dialect.MySQLDialect
+#    show-sql: true
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:likelion14th_hackathon}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:}
-  jpa:
-    hibernate:
-      ddl-auto: ${JPA_DDL_AUTO:update}
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
-    show-sql: true
+    url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:likelion14th_hackathon}?characterEncoding=UTF-8
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: root
+    password: 1030
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.MariaDBDialect
   servlet:
     multipart:
       max-file-size: 10MB
@@ -31,3 +40,8 @@ spring:
 jwt:
   secret: ${JWT_SECRET:sfj-9f3a2c7e4b8d1f6a0c5e7d9b2a4f8e1c}
   expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:./uploads}
+  base-url: ${FILE_BASE_URL:http://localhost:8080/uploads}
+

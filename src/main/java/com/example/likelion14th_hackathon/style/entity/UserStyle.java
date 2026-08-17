@@ -1,6 +1,6 @@
 package com.example.likelion14th_hackathon.style.entity;
 
-import com.example.likelion14th_hackathon.member.entity.Member;   // TODO: 실제 경로 확인
+import com.example.likelion14th_hackathon.member.domain.Member;   
 import jakarta.persistence.*;
 import lombok.Getter;
 

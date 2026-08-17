@@ -1,6 +1,6 @@
 package com.example.likelion14th_hackathon.schedule.repository;
 
-import com.example.likelion14th_hackathon.member.entity.Member;
+import com.example.likelion14th_hackathon.member.domain.Member;
 import com.example.likelion14th_hackathon.schedule.entity.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 

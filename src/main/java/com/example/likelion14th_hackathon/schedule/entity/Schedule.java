@@ -1,6 +1,6 @@
 package com.example.likelion14th_hackathon.schedule.entity;
 
-import com.example.likelion14th_hackathon.member.entity.Member;
+import com.example.likelion14th_hackathon.member.domain.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 

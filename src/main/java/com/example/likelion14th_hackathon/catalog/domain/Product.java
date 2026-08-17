@@ -31,6 +31,8 @@ public class Product {
     @Column(length = 50)
     private String color;
 
+    // 소재는 여러 상품에서 재사용되므로 별도 materials 테이블로 분리한다.
+    // Product 여러 개가 하나의 Material을 참조하는 N:1 관계다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "material_id", nullable = false)
     private Material material;
@@ -41,12 +43,15 @@ public class Product {
     @Column(name = "bag_size", length = 50)
     private String bagSize;
 
+    // 추천 시스템에서 사용하는 패션 스타일 분류다.
+    // 예: 비즈니스 캐주얼, 오피스/포멀, 스트릿, 미니멀
     @Column(name = "style_category", length = 100)
     private String styleCategory;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    // 이미지 파일은 S3에 저장하고, DB에는 S3 URL만 저장한다.
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 

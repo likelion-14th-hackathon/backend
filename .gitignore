@@ -40,3 +40,6 @@ out/
 build/
 .gradle/
 .idea/
+
+### Environment variables ###
+.env

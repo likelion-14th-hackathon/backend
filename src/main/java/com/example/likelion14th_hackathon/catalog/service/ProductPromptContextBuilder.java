@@ -1,6 +1,6 @@
 package com.example.likelion14th_hackathon.catalog.service;
 
-import com.example.likelion14th_hackathon.catalog.domain.MaterialInfo;
+import com.example.likelion14th_hackathon.catalog.domain.Material;
 import com.example.likelion14th_hackathon.catalog.domain.OwnedProduct;
 import com.example.likelion14th_hackathon.catalog.domain.Product;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ public class ProductPromptContextBuilder {
             return "[상품 정보]\n조회된 상품 정보가 없습니다.";
         }
 
-        MaterialInfo material = product.getMaterial();
+        Material material = product.getMaterial();
 
         return """
                 [상품 정보]
@@ -39,13 +39,13 @@ public class ProductPromptContextBuilder {
                 waterWarning: %s
                 repairRecommendation: %s
                 """.formatted(
-                value(product.getId()),
+                value(product.getProductId()),
                 value(product.getName()),
                 value(product.getPrice()),
                 value(product.getProductType()),
                 value(product.getColor()),
-                value(product.getClothsize()),
-                value(product.getBagsize()),
+                value(product.getClothSize()),
+                value(product.getBagSize()),
                 value(product.getStyleCategory()),
                 value(product.getDescription()),
                 value(product.getImageUrl()),

@@ -1,6 +1,7 @@
 package com.example.likelion14th_hackathon.common.security;
 
 import com.example.likelion14th_hackathon.common.api.UnauthorizedException;
+import com.example.likelion14th_hackathon.member.domain.Member;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +21,41 @@ public class JwtTokenProvider {
     private static final Pattern EXP_PATTERN = Pattern.compile("\"exp\"\\s*:\\s*(\\d+)");
 
     private final byte[] signingKey;
+    private final long expirationSeconds;
 
-    public JwtTokenProvider(@Value("${jwt.secret:change-this-secret-before-deploy}") String secret) {
+    public JwtTokenProvider(
+            @Value("${jwt.secret:change-this-secret-before-deploy}") String secret,
+            @Value("${jwt.expiration-minutes:120}") long expirationMinutes
+    ) {
         this.signingKey = sha256(secret);
+        this.expirationSeconds = expirationMinutes * 60;
+    }
+
+    public String createAccessToken(Member member) {
+        long now = Instant.now().getEpochSecond();
+        long expiresAt = now + expirationSeconds;
+
+        String headerJson = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+        String payloadJson = """
+                {"sub":"%s","memberId":%d,"email":"%s","nickname":"%s","iat":%d,"exp":%d}
+                """.formatted(
+                member.getId(),
+                member.getId(),
+                escapeJson(member.getEmail()),
+                escapeJson(member.getNickname()),
+                now,
+                expiresAt
+        ).trim();
+
+        String header = base64Url(headerJson.getBytes(StandardCharsets.UTF_8));
+        String payload = base64Url(payloadJson.getBytes(StandardCharsets.UTF_8));
+        String unsignedToken = header + "." + payload;
+
+        return unsignedToken + "." + sign(unsignedToken);
+    }
+
+    public long getExpirationSeconds() {
+        return expirationSeconds;
     }
 
     public Long extractMemberIdFromAuthorization(String authorizationHeader) {
@@ -98,11 +131,9 @@ public class JwtTokenProvider {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(signingKey, "HmacSHA256"));
-            return Base64.getUrlEncoder()
-                    .withoutPadding()
-                    .encodeToString(mac.doFinal(unsignedToken.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception exception) {
-            throw new IllegalStateException("JWT 서명 검증에 실패했습니다.", exception);
+            return base64Url(mac.doFinal(unsignedToken.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception e) {
+            throw new IllegalStateException("JWT 서명 처리에 실패했습니다.", e);
         }
     }
 
@@ -110,8 +141,20 @@ public class JwtTokenProvider {
         try {
             return MessageDigest.getInstance("SHA-256")
                     .digest(value.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception exception) {
-            throw new IllegalStateException("JWT Secret 처리에 실패했습니다.", exception);
+        } catch (Exception e) {
+            throw new IllegalStateException("JWT Secret 처리에 실패했습니다.", e);
         }
+    }
+
+    private String base64Url(byte[] value) {
+        return Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(value);
+    }
+
+    private String escapeJson(String value) {
+        return value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"");
     }
 }

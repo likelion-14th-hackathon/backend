@@ -61,6 +61,10 @@ public class OwnedProduct {
         return member;
     }
 
+    public Long getMemberId() {
+        return member == null ? null : member.getId();
+    }
+
     public Product getProduct() {
         return product;
     }

@@ -1,7 +1,5 @@
 package com.example.likelion14th_hackathon.care.service;
 
-import com.example.likelion14th_hackathon.catalog.domain.OwnedProduct;
-import com.example.likelion14th_hackathon.catalog.repository.OwnedProductRepository;
 import com.example.likelion14th_hackathon.catalog.service.ProductPromptContextBuilder;
 import com.example.likelion14th_hackathon.care.dto.WeatherInfo;
 import com.example.likelion14th_hackathon.common.api.ResourceNotFoundException;
@@ -14,6 +12,8 @@ import com.example.likelion14th_hackathon.common.chat.repository.ChatRepository;
 import com.example.likelion14th_hackathon.common.chat.repository.SessionRepository;
 import com.example.likelion14th_hackathon.common.chat.service.ChatSessionService;
 import com.example.likelion14th_hackathon.common.llm.LlmClient;
+import com.example.likelion14th_hackathon.mypage.domain.OwnedProduct;
+import com.example.likelion14th_hackathon.mypage.repository.OwnedProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

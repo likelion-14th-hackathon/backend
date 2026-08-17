@@ -1,6 +1,6 @@
 package com.example.likelion14th_hackathon.notification.service;
 
-import com.example.likelion14th_hackathon.catalog.domain.OwnedProduct;
+import com.example.likelion14th_hackathon.mypage.domain.OwnedProduct;
 import com.example.likelion14th_hackathon.notification.domain.NotificationTriggerType;
 import com.example.likelion14th_hackathon.notification.domain.Notification;
 import com.example.likelion14th_hackathon.notification.dto.NotificationCreateRequest;

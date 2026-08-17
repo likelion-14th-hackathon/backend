@@ -2,10 +2,10 @@ package com.example.likelion14th_hackathon.notification.service;
 
 import com.example.likelion14th_hackathon.care.dto.WeatherInfo;
 import com.example.likelion14th_hackathon.care.service.WeatherApiService;
-import com.example.likelion14th_hackathon.catalog.domain.OwnedProduct;
-import com.example.likelion14th_hackathon.catalog.domain.OwnedProductStatus;
 import com.example.likelion14th_hackathon.catalog.domain.Product;
-import com.example.likelion14th_hackathon.catalog.repository.OwnedProductRepository;
+import com.example.likelion14th_hackathon.mypage.domain.OwnedProduct;
+import com.example.likelion14th_hackathon.mypage.domain.OwnershipStatus;
+import com.example.likelion14th_hackathon.mypage.repository.OwnedProductRepository;
 import com.example.likelion14th_hackathon.notification.domain.NotificationTriggerType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,7 @@ public class NotificationScheduler {
         }
 
         LocalDate today = LocalDate.now();
-        List<OwnedProduct> ownedProducts = ownedProductRepository.findByStatus(OwnedProductStatus.ACTIVE);
+        List<OwnedProduct> ownedProducts = ownedProductRepository.findByStatus(OwnershipStatus.OWNED);
         for (OwnedProduct ownedProduct : ownedProducts) {
             String productName = getProductName(ownedProduct);
             notificationService.createScheduledNotificationIfAbsent(
@@ -62,7 +62,7 @@ public class NotificationScheduler {
     @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
     public void createCareCycleNotifications() {
         LocalDate today = LocalDate.now();
-        List<OwnedProduct> ownedProducts = ownedProductRepository.findByStatus(OwnedProductStatus.ACTIVE);
+        List<OwnedProduct> ownedProducts = ownedProductRepository.findByStatus(OwnershipStatus.OWNED);
 
         for (OwnedProduct ownedProduct : ownedProducts) {
             if (!isCareCycleDue(ownedProduct, today)) {

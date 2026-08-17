@@ -1,8 +1,8 @@
 package com.example.likelion14th_hackathon.catalog.service;
 
 import com.example.likelion14th_hackathon.catalog.domain.Material;
-import com.example.likelion14th_hackathon.catalog.domain.OwnedProduct;
 import com.example.likelion14th_hackathon.catalog.domain.Product;
+import com.example.likelion14th_hackathon.mypage.domain.OwnedProduct;
 import org.springframework.stereotype.Component;
 
 @Component

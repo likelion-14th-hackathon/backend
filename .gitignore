@@ -36,5 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 
-### Test Photos ###
-uploads/
+### Environment variables ###
+.env

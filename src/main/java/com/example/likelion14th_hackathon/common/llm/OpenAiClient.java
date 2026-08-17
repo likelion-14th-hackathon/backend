@@ -115,7 +115,6 @@ public class OpenAiClient implements LlmClient {
                 throw new ExternalApiException("OpenAI 응답이 비어 있습니다.");
             }
             return response.choices().get(0).message().content();
-
         } catch (RestClientException e) {
             throw new ExternalApiException("OpenAI 호출에 실패했습니다. 모델명 또는 API Key를 확인해주세요. model=" + model);
         }

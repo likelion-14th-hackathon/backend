@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    List<Product> findByStyleCategory(String styleCategory);
+    //List<Product> findByStyleCategory(String styleCategory);
 
     List<Product> findByNameContaining(String keyword);
 }

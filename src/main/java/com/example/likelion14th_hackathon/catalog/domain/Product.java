@@ -43,11 +43,6 @@ public class Product {
     @Column(name = "bag_size", length = 50)
     private String bagSize;
 
-    // 추천 시스템에서 사용하는 패션 스타일 분류다.
-    // 예: 비즈니스 캐주얼, 오피스/포멀, 스트릿, 미니멀
-    @Column(name = "style_category", length = 100)
-    private String styleCategory;
-
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -69,7 +64,6 @@ public class Product {
             Material material,
             Integer clothSize,
             String bagSize,
-            String styleCategory,
             String description,
             String imageUrl,
             String careInfo
@@ -81,7 +75,6 @@ public class Product {
         this.material = material;
         this.clothSize = clothSize;
         this.bagSize = bagSize;
-        this.styleCategory = styleCategory;
         this.description = description;
         this.imageUrl = imageUrl;
         this.careInfo = careInfo;
@@ -119,9 +112,6 @@ public class Product {
         return bagSize;
     }
 
-    public String getStyleCategory() {
-        return styleCategory;
-    }
 
     public String getDescription() {
         return description;
@@ -143,7 +133,6 @@ public class Product {
             Material material,
             Integer clothSize,
             String bagSize,
-            String styleCategory,
             String description,
             String imageUrl,
             String careInfo
@@ -155,7 +144,6 @@ public class Product {
         this.material = material;
         this.clothSize = clothSize;
         this.bagSize = bagSize;
-        this.styleCategory = styleCategory;
         this.description = description;
         this.imageUrl = imageUrl;
         this.careInfo = careInfo;

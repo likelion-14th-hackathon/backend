@@ -2,7 +2,6 @@ package com.example.likelion14th_hackathon.common.llm;
 
 import com.example.likelion14th_hackathon.common.exception.ExternalApiException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@ConditionalOnProperty(name = "llm.provider", havingValue = "openai")
 public class OpenAiClient implements LlmClient {
 
     private final RestClient restClient;

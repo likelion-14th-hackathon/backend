@@ -1,5 +1,4 @@
 llm:
-  provider: ${LLM_PROVIDER:openai}
   openai:
     api-key: ${OPENAI_API_KEY:}
     fast-model: gpt-4o-mini
@@ -26,5 +25,5 @@ spring:
     show-sql: true
 
 jwt:
-  secret: ${JWT_SECRET:change-this-secret-before-deploy}
+  secret: ${JWT_SECRET:sfj-9f3a2c7e4b8d1f6a0c5e7d9b2a4f8e1c}
   expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}

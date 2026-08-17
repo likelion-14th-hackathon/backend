@@ -22,7 +22,6 @@ cp .env.example .env
 ```env
 OPENAI_API_KEY=여기에_오픈AI_API_KEY
 JWT_SECRET=충분히_긴_랜덤_문자열
-LLM_PROVIDER=openai
 SERVER_PORT=8080
 
 DB_HOST=가비아_DB_HOST

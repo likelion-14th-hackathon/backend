@@ -1,6 +1,7 @@
 package com.example.likelion14th_hackathon.mypage.repository;
 
 import com.example.likelion14th_hackathon.mypage.domain.OwnedProduct;
+import com.example.likelion14th_hackathon.mypage.domain.OwnershipStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -8,4 +9,6 @@ import java.util.List;
 public interface OwnedProductRepository extends JpaRepository<OwnedProduct, Long> {
 
     List<OwnedProduct> findByMember_Id(Long memberId);
+
+    List<OwnedProduct> findByStatus(OwnershipStatus status);
 }

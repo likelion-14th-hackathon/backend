@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface OwnedProductRepository extends JpaRepository<OwnedProduct, Long> {
 
-    List<OwnedProduct> findByMemberId(Long memberId);
+    List<OwnedProduct> findByMember_Id(Long memberId);
 }

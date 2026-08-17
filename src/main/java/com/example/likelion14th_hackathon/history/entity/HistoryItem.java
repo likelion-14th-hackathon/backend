@@ -1,12 +1,10 @@
 package com.example.likelion14th_hackathon.history.entity;
 
-import com.example.likelion14th_hackathon.product.entity.Product;
+import com.example.likelion14th_hackathon.mypage.domain.OwnedProduct;
 import jakarta.persistence.*;
-import jakarta.persistence.Id;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-
 
 @Entity
 @Getter
@@ -14,12 +12,12 @@ public class HistoryItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column (name = "history_id")
+    @Column(name = "history_id")
     private Long historyId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "owned_product_id", nullable = false)
+    private OwnedProduct ownedProduct;   // Product → OwnedProduct
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -31,18 +29,13 @@ public class HistoryItem {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    protected HistoryItem() {
-        // JPA 기본 생성자
-    }
+    protected HistoryItem() {}
 
-    public HistoryItem(Product product, HistoryItemType historyItemType, String title, LocalDateTime createdAt) {
-        this.product = product;
+    public HistoryItem(OwnedProduct ownedProduct, HistoryItemType historyItemType,
+                       String title, LocalDateTime createdAt) {
+        this.ownedProduct = ownedProduct;
         this.historyItemType = historyItemType;
         this.title = title;
         this.createdAt = createdAt;
     }
-
-
-
-
 }

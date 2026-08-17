@@ -18,6 +18,6 @@ public class MyPageService {
 
     @Transactional(readOnly = true)
     public List<OwnedProduct> getOwnedProducts(Long memberId) {
-        return ownedProductRepository.findByMemberId(memberId);
+        return ownedProductRepository.findByMember_Id(memberId);
     }
 }

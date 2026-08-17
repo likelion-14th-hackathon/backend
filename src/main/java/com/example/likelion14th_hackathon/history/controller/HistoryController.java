@@ -14,51 +14,43 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/products/{productId}/histories")
+@RequestMapping("/mypage/owned-products/{ownedProductId}")
 @RequiredArgsConstructor
 public class HistoryController {
 
-    private HistoryService historyService;
+    private final HistoryService historyService;
     private final FileStorageService fileStorageService;
 
-    //1. 히스토리 조회
     @GetMapping
     public ResponseEntity<ApiResponse<List<HistoryResponse>>> getHistories(
-            @PathVariable Long productId,
-            @RequestHeader("X-User-Id") Long userId
+            @PathVariable Long ownedProductId,
+            @RequestHeader("X-User-Id") Long memberId
     ) {
-        List<HistoryResponse> result = historyService.getHistories(productId, userId);
-        return ResponseEntity.ok(
-                ApiResponse.success(result, "히스토리 목록을 조회했습니다.")
-        );
+        List<HistoryResponse> result = historyService.getHistories(ownedProductId, memberId);
+        return ResponseEntity.ok(ApiResponse.success(result, "히스토리 목록을 조회했습니다."));
     }
 
-    // 2. 사진 추가
     @PostMapping("/photo")
-    public ResponseEntity<ApiResponse<HistoryResponse>> createPhotoHistory(
-            @PathVariable Long productId,
-            @RequestHeader("X-User-Id") Long userId,
+    public ResponseEntity<ApiResponse<HistoryResponse>> addPhoto(
+            @PathVariable Long ownedProductId,
+            @RequestHeader("X-User-Id") Long memberId,
             @RequestParam("photo") MultipartFile photo,
             @RequestParam(value = "userMemo", required = false) String userMemo
     ) {
-        String photoUrl = fileStorageService.store(photo);   // 실제 저장!
-
-        HistoryResponse result = historyService.createPhotoHistory(productId, userId, photoUrl, userMemo);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                ApiResponse.created(result, "사진을 등록했습니다.")
-        );
+        String photoUrl = fileStorageService.store(photo);
+        HistoryResponse result = historyService.addPhotoHistory(
+                ownedProductId, memberId, photoUrl, userMemo);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(result, "사진을 등록했습니다."));
     }
 
-    // 3. 사진 상세 조회
-    @GetMapping("/{historyId}/photo")
+    @GetMapping("/histories/{historyId}")
     public ResponseEntity<ApiResponse<PhotoDetailResponse>> getPhotoDetail(
-            @PathVariable Long productId,
+            @PathVariable Long ownedProductId,
             @PathVariable Long historyId,
-            @RequestHeader("X-User-Id") Long userId
+            @RequestHeader("X-User-Id") Long memberId
     ) {
-        PhotoDetailResponse result = historyService.getPhotoDetail(historyId, userId);
-        return ResponseEntity.ok(
-                ApiResponse.success(result, "사진 상세를 조회했습니다.")
-        );
+        PhotoDetailResponse result = historyService.getPhotoDetail(historyId, memberId);
+        return ResponseEntity.ok(ApiResponse.success(result, "사진 상세를 조회했습니다."));
     }
 }

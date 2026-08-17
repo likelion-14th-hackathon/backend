@@ -38,3 +38,6 @@ out/
 
 ### Environment variables ###
 .env
+
+### User-uploaded photos ###
+uploads/

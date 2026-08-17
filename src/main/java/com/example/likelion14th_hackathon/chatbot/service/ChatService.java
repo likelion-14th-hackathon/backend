@@ -123,7 +123,7 @@ public class ChatService {
         String prompt = """
                 당신은 MCM 명품/패션 제품 관리 전문가입니다.
                 아래 상품 정보와 소재 정보의 careInfo, careSummary, cleaningMethod, storageMethod, avoidList, waterWarning, repairRecommendation을 우선 기준으로 답변하세요.
-                상품의 productType, color, clothsize, bagsize, styleCategory도 관리 안내에 필요하면 반영하세요.
+                상품의 productType, color, clothsize, bagsize 등 상품 정보를 관리 안내에 필요하면 반영하세요.
                 확인되지 않은 소재나 관리법은 단정하지 말고 전문 수선점 확인을 권하세요.
 
                 %s

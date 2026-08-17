@@ -3,10 +3,20 @@ package com.example.likelion14th_hackathon.catalog.service;
 import com.example.likelion14th_hackathon.catalog.domain.Material;
 import com.example.likelion14th_hackathon.catalog.domain.Product;
 import com.example.likelion14th_hackathon.mypage.domain.OwnedProduct;
+import com.example.likelion14th_hackathon.style.entity.ProductStyle;
+import com.example.likelion14th_hackathon.style.repository.ProductStyleRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
 
 @Component
 public class ProductPromptContextBuilder {
+
+    private final ProductStyleRepository productStyleRepository;
+
+    public ProductPromptContextBuilder(ProductStyleRepository productStyleRepository) {
+        this.productStyleRepository = productStyleRepository;
+    }
 
     public String buildProductContext(Product product) {
         if (product == null) {
@@ -14,6 +24,15 @@ public class ProductPromptContextBuilder {
         }
 
         Material material = product.getMaterial();
+        String styleTypes = product.getProductId() == null
+                ? "정보 없음"
+                : productStyleRepository.findByProduct_ProductId(product.getProductId()).stream()
+                .map(ProductStyle::getStyleType)
+                .map(this::value)
+                .collect(Collectors.joining(", "));
+        if (styleTypes.isBlank()) {
+            styleTypes = "정보 없음";
+        }
 
         return """
                 [상품 정보]
@@ -21,10 +40,10 @@ public class ProductPromptContextBuilder {
                 name: %s
                 price: %s
                 productType: %s
+                styleTypes: %s
                 color: %s
                 clothsize: %s
                 bagsize: %s
-                styleCategory: %s
                 description: %s
                 imageUrl: %s
                 careInfo: %s
@@ -43,10 +62,10 @@ public class ProductPromptContextBuilder {
                 value(product.getName()),
                 value(product.getPrice()),
                 value(product.getProductType()),
+                styleTypes,
                 value(product.getColor()),
                 value(product.getClothSize()),
                 value(product.getBagSize()),
-                value(product.getStyleCategory()),
                 value(product.getDescription()),
                 value(product.getImageUrl()),
                 value(product.getCareInfo()),

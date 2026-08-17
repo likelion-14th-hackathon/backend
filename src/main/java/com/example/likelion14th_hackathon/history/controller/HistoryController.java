@@ -1,6 +1,7 @@
 package com.example.likelion14th_hackathon.history.controller;
 
 import com.example.likelion14th_hackathon.common.api.ApiResponse;
+import com.example.likelion14th_hackathon.common.file.FileStorageService;
 import com.example.likelion14th_hackathon.history.dto.HistoryResponse;
 import com.example.likelion14th_hackathon.history.dto.PhotoDetailResponse;
 import com.example.likelion14th_hackathon.history.service.HistoryService;
@@ -18,6 +19,7 @@ import java.util.List;
 public class HistoryController {
 
     private HistoryService historyService;
+    private final FileStorageService fileStorageService;
 
     //1. 히스토리 조회
     @GetMapping
@@ -33,14 +35,13 @@ public class HistoryController {
 
     // 2. 사진 추가
     @PostMapping("/photo")
-    public ResponseEntity<ApiResponse<HistoryResponse>> addPhoto(
+    public ResponseEntity<ApiResponse<HistoryResponse>> createPhotoHistory(
             @PathVariable Long productId,
             @RequestHeader("X-User-Id") Long userId,
             @RequestParam("photo") MultipartFile photo,
             @RequestParam(value = "userMemo", required = false) String userMemo
     ) {
-        // TODO: photo 파일을 서버에 저장하고 실제 접근 URL 받아오기
-        String photoUrl = "임시_URL";
+        String photoUrl = fileStorageService.store(photo);   // 실제 저장!
 
         HistoryResponse result = historyService.createPhotoHistory(productId, userId, photoUrl, userMemo);
         return ResponseEntity.status(HttpStatus.CREATED).body(

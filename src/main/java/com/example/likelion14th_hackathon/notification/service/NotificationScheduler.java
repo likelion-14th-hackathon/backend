@@ -2,7 +2,6 @@ package com.example.likelion14th_hackathon.notification.service;
 
 import com.example.likelion14th_hackathon.care.dto.WeatherInfo;
 import com.example.likelion14th_hackathon.care.service.WeatherApiService;
-import com.example.likelion14th_hackathon.catalog.domain.Product;
 import com.example.likelion14th_hackathon.mypage.domain.OwnedProduct;
 import com.example.likelion14th_hackathon.mypage.domain.OwnershipStatus;
 import com.example.likelion14th_hackathon.mypage.repository.OwnedProductRepository;
@@ -29,6 +28,7 @@ public class NotificationScheduler {
     private final OwnedProductRepository ownedProductRepository;
     private final NotificationService notificationService;
     private final WeatherApiService weatherApiService;
+    private final NotificationMessageGenerator notificationMessageGenerator;
 
     @Scheduled(cron = "0 0 8 * * *", zone = "Asia/Seoul")
     public void createWeatherAlertNotifications() {
@@ -47,13 +47,11 @@ public class NotificationScheduler {
         LocalDate today = LocalDate.now();
         List<OwnedProduct> ownedProducts = ownedProductRepository.findByStatus(OwnershipStatus.OWNED);
         for (OwnedProduct ownedProduct : ownedProducts) {
-            String productName = getProductName(ownedProduct);
             notificationService.createScheduledNotificationIfAbsent(
                     ownedProduct,
                     NotificationTriggerType.WEATHER_ALERT,
-                    "날씨 기반 케어 알림",
-                    String.format("현재 %s, 습도 %d%%입니다. %s 관리에 주의해 주세요.",
-                            weather.weatherText(), weather.humidity(), productName),
+                    notificationMessageGenerator.createTitle(NotificationTriggerType.WEATHER_ALERT),
+                    notificationMessageGenerator.createWeatherAlertMessage(ownedProduct, weather),
                     today
             );
         }
@@ -69,12 +67,11 @@ public class NotificationScheduler {
                 continue;
             }
 
-            String productName = getProductName(ownedProduct);
             notificationService.createScheduledNotificationIfAbsent(
                     ownedProduct,
                     NotificationTriggerType.CARE_CYCLE,
-                    "정기 케어 알림",
-                    String.format("%s의 정기 케어 주기가 도래했습니다. 소재에 맞는 관리 상태를 확인해 주세요.", productName),
+                    notificationMessageGenerator.createTitle(NotificationTriggerType.CARE_CYCLE),
+                    notificationMessageGenerator.createCareCycleMessage(ownedProduct),
                     today
             );
         }
@@ -96,11 +93,4 @@ public class NotificationScheduler {
         return daysSincePurchase > 0 && daysSincePurchase % CARE_CYCLE_DAYS == 0;
     }
 
-    private String getProductName(OwnedProduct ownedProduct) {
-        Product product = ownedProduct.getProduct();
-        if (product == null || product.getName() == null || product.getName().isBlank()) {
-            return "등록 제품";
-        }
-        return product.getName();
-    }
 }

@@ -48,8 +48,11 @@ public class NotificationController {
 
     @PostMapping("/test-trigger")
     public ResponseEntity<ApiResponse<TestNotificationResponse>> createTestNotification(
-            @Valid @RequestBody NotificationCreateRequest request) {
-        NotificationResponse response = notificationService.createTestNotification(request);
+            @RequestHeader("Authorization") String authorizationHeader,
+            @Valid @RequestBody NotificationCreateRequest request
+    ) {
+        Long memberId = jwtTokenProvider.extractMemberIdFromAuthorization(authorizationHeader);
+        NotificationResponse response = notificationService.createTestNotification(memberId, request);
         return ResponseEntity.status(201).body(ApiResponse.created(
                 TestNotificationResponse.from(response), "테스트 알림이 성공적으로 생성되었습니다."));
     }

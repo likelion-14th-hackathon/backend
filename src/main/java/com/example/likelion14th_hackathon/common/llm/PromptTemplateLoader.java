@@ -77,5 +77,19 @@ public class PromptTemplateLoader {
                 repairRecommendation
         );
     }
-}
 
+    // 추가: 사진 기반 사용자 스타일 분석
+    public String styleAnalysisPrompt() {
+        return """
+                다음 사진들은 한 사용자가 업로드한 옷차림 사진입니다.
+                사진들을 종합해서 이 사용자의 전반적인 패션 스타일을 판단해 주세요.
+
+                반드시 아래 8개 중에서만 선택하세요:
+                MINIMAL, CASUAL, STREET, CLASSIC, VINTAGE, SPORTY, ROMANTIC, CHIC
+
+                가장 잘 맞는 순서대로 최대 3개까지 고르세요.
+                설명이나 다른 텍스트 없이, 아래 JSON 형식으로만 답하세요:
+                {"styles": ["STREET", "CASUAL"]}
+                """;
+    }
+}

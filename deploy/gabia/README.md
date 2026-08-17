@@ -14,7 +14,7 @@
 ```bash
 git clone <팀 GitHub 저장소 URL>
 cd likelion14th_hackathon
-cp .env.example .env
+cp .env .env
 ```
 
 ## 3. `.env`에 실제 값 넣기

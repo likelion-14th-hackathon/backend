@@ -2,6 +2,7 @@ package com.example.likelion14th_hackathon.history.controller;
 
 import com.example.likelion14th_hackathon.common.api.ApiResponse;
 import com.example.likelion14th_hackathon.common.file.FileStorageService;
+import com.example.likelion14th_hackathon.common.security.JwtTokenProvider;
 import com.example.likelion14th_hackathon.history.dto.HistoryResponse;
 import com.example.likelion14th_hackathon.history.dto.PhotoDetailResponse;
 import com.example.likelion14th_hackathon.history.service.HistoryService;
@@ -20,12 +21,14 @@ public class HistoryController {
 
     private final HistoryService historyService;
     private final FileStorageService fileStorageService;
+    private final JwtTokenProvider jwtTokenProvider;   // 추가
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<HistoryResponse>>> getHistories(
             @PathVariable Long ownedProductId,
-            @RequestHeader("X-User-Id") Long memberId
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
+        Long memberId = jwtTokenProvider.extractMemberIdFromAuthorization(authorizationHeader);
         List<HistoryResponse> result = historyService.getHistories(ownedProductId, memberId);
         return ResponseEntity.ok(ApiResponse.success(result, "히스토리 목록을 조회했습니다."));
     }
@@ -33,10 +36,11 @@ public class HistoryController {
     @PostMapping("/photo")
     public ResponseEntity<ApiResponse<HistoryResponse>> addPhoto(
             @PathVariable Long ownedProductId,
-            @RequestHeader("X-User-Id") Long memberId,
+            @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam("photo") MultipartFile photo,
             @RequestParam(value = "userMemo", required = false) String userMemo
     ) {
+        Long memberId = jwtTokenProvider.extractMemberIdFromAuthorization(authorizationHeader);
         String photoUrl = fileStorageService.store(photo);
         HistoryResponse result = historyService.addPhotoHistory(
                 ownedProductId, memberId, photoUrl, userMemo);
@@ -48,8 +52,9 @@ public class HistoryController {
     public ResponseEntity<ApiResponse<PhotoDetailResponse>> getPhotoDetail(
             @PathVariable Long ownedProductId,
             @PathVariable Long historyId,
-            @RequestHeader("X-User-Id") Long memberId
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
+        Long memberId = jwtTokenProvider.extractMemberIdFromAuthorization(authorizationHeader);
         PhotoDetailResponse result = historyService.getPhotoDetail(historyId, memberId);
         return ResponseEntity.ok(ApiResponse.success(result, "사진 상세를 조회했습니다."));
     }

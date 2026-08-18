@@ -18,7 +18,7 @@ import java.util.List;
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
-    private final MemberRepository memberRepository;   // TODO: 실제 이름 확인
+    private final MemberRepository memberRepository;
 
     // 1. 일정 등록
     @Transactional

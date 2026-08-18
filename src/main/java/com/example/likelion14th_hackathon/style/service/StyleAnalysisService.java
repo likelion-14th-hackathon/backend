@@ -34,7 +34,7 @@ public class StyleAnalysisService {
         // 2. 결과가 없으면 기존 스타일 유지 (덮어쓰지 않음)
         if (styles.isEmpty()) {
             log.info("스타일 분석 결과가 없어 기존 스타일을 유지합니다. memberId={}",
-                    member.getId());   // TODO: Member PK getter 확인
+                    member.getId());
             return List.of();
         }
 

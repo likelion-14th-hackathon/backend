@@ -1,4 +1,5 @@
 llm:
+  provider: ${LLM_PROVIDER:openai}
   openai:
     api-key: ${OPENAI_API_KEY:}
     fast-model: gpt-4o-mini

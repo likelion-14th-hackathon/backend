@@ -32,6 +32,7 @@ public class OpenAiClient implements LlmClient {
         this.apiKey = apiKey;
         this.fastModel = fastModel;
         this.reasoningModel = reasoningModel;
+//        System.out.println(">>> OpenAiClient 등록됨. 모델=" + fastModel);  실제로 모델이 가동하는지에 대한 로그
     }
 
     @Override

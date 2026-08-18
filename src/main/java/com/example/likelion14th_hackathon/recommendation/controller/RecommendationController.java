@@ -1,6 +1,7 @@
 package com.example.likelion14th_hackathon.recommendation.controller;
 
 import com.example.likelion14th_hackathon.common.api.ApiResponse;
+import com.example.likelion14th_hackathon.common.security.JwtTokenProvider;
 import com.example.likelion14th_hackathon.recommendation.dto.RecommendationResponse;
 import com.example.likelion14th_hackathon.recommendation.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
@@ -17,21 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecommendationController {
 
     private final RecommendationService recommendationService;
+    private final JwtTokenProvider jwtTokenProvider;   // 추가
 
-    /**
-     * 특정 일정에 어울리는 제품을 추천한다.
-     * 보유 제품과 미보유 제품을 나눠서 반환한다.
-     */
     @GetMapping
     public ResponseEntity<ApiResponse<RecommendationResponse>> recommend(
             @PathVariable Long scheduleId,
-            @RequestHeader("X-User-Id") Long memberId   // 임시: 인증 붙으면 교체
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
+        Long memberId = jwtTokenProvider.extractMemberIdFromAuthorization(authorizationHeader);
         RecommendationResponse result =
                 recommendationService.recommendForSchedule(scheduleId, memberId);
-
-        return ResponseEntity.ok(
-                ApiResponse.success(result, "추천 제품을 조회했습니다.")
-        );
+        return ResponseEntity.ok(ApiResponse.success(result, "추천 제품을 조회했습니다."));
     }
 }

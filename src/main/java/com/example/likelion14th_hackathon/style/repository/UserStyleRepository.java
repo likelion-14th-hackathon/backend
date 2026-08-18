@@ -1,6 +1,6 @@
 package com.example.likelion14th_hackathon.style.repository;
 
-import com.example.likelion14th_hackathon.member.domain.Member;   // TODO: 경로 확인
+import com.example.likelion14th_hackathon.member.domain.Member;
 import com.example.likelion14th_hackathon.style.entity.UserStyle;
 import org.springframework.data.jpa.repository.JpaRepository;
 

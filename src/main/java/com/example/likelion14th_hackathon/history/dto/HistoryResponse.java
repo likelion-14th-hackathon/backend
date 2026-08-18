@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class HistoryResponse {
 
     private final Long historyId;
-    private final Long productId;
+    private final Long ownedProductId;
     private final HistoryItemType historyItemType;
     private final String title;
     private final String thumbnailUrl;   // PHOTO면 사진 URL, 아니면 null
@@ -19,7 +19,7 @@ public class HistoryResponse {
 
     public HistoryResponse(HistoryItem item, String thumbnailUrl) {
         this.historyId = item.getHistoryId();
-        this.productId = item.getOwnedProduct().getId();
+        this.ownedProductId = item.getOwnedProduct().getId();
         this.historyItemType = item.getHistoryItemType();
         this.title = item.getTitle();
         this.thumbnailUrl = thumbnailUrl;

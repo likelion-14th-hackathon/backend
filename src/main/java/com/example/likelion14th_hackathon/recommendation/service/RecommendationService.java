@@ -87,7 +87,7 @@ public class RecommendationService {
             return Long.compare(scoreB, scoreA);
         });
 
-        // 5. 보유/미보유 분리 (현재 보유 중인 것만 "보유"로 처리)
+        // 5. 보유/미보유 분리 (각각 최상위 1개만 추천)
         Set<Long> ownedProductIds = allPurchased.stream()
                 .filter(op -> op.getStatus() == OwnershipStatus.OWNED)
                 .map(op -> op.getProduct().getProductId())
@@ -95,15 +95,26 @@ public class RecommendationService {
 
         List<ProductSummary> owned = new ArrayList<>();
         List<ProductSummary> notOwned = new ArrayList<>();
+
         for (Product p : candidates) {
-            ProductSummary summary = new ProductSummary(p.getProductId(), p.getName(), p.getImageUrl());
+            // 양쪽 다 채워졌으면 더 볼 필요 없음
+            if (!owned.isEmpty() && !notOwned.isEmpty()) {
+                break;
+            }
+
+            ProductSummary summary = new ProductSummary(
+                    p.getProductId(), p.getName(), p.getImageUrl());
+
             if (ownedProductIds.contains(p.getProductId())) {
-                owned.add(summary);
+                if (owned.isEmpty()) {
+                    owned.add(summary);
+                }
             } else {
-                notOwned.add(summary);
+                if (notOwned.isEmpty()) {
+                    notOwned.add(summary);
+                }
             }
         }
-
         return new RecommendationResponse(scheduleId, schedule.getCategory(),
                 schedule.getTitle(), owned, notOwned);
     }

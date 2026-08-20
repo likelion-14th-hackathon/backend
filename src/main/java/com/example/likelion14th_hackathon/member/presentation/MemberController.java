@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping({"/members", "/api/members"})
+@RequestMapping({"/members", "/api/members", "/auth/members"})
 public class MemberController {
 
     private final MemberService memberService;

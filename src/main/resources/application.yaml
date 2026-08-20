@@ -2,8 +2,8 @@ llm:
   provider: ${LLM_PROVIDER:openai}
   openai:
     api-key: ${OPENAI_API_KEY:}
-    fast-model: gpt-4o-mini
-    reasoning-model: gpt-5.5
+    fast-model: ${LLM_OPENAI_FAST_MODEL:gpt-4o-mini}
+    reasoning-model: ${LLM_OPENAI_REASONING_MODEL:gpt-4o-mini}
 
 server:
   port: ${SERVER_PORT:8080}

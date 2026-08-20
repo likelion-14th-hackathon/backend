@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/schedules/{scheduleId}/recommendation")
+@RequestMapping("/mypage/schedules/{scheduleId}/recommendation")
 @RequiredArgsConstructor
 public class RecommendationController {
 

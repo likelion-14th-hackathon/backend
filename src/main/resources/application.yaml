@@ -3,7 +3,7 @@ llm:
   openai:
     api-key: ${OPENAI_API_KEY:}
     fast-model: ${LLM_OPENAI_FAST_MODEL:gpt-4o-mini}
-    reasoning-model: ${LLM_OPENAI_REASONING_MODEL:gpt-4o-mini}
+    reasoning-model: ${LLM_OPENAI_REASONING_MODEL:gpt-5.5}
 
 server:
   port: ${SERVER_PORT:8080}

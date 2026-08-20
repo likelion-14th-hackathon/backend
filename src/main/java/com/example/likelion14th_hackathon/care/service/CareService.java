@@ -27,6 +27,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CareService {
 
+    private static final double SEOUL_LATITUDE = 37.5665;
+    private static final double SEOUL_LONGITUDE = 126.9780;
+
     private final SessionRepository sessionRepository;
     private final ChatRepository chatRepository;
     private final ChatSessionService chatSessionService;
@@ -54,10 +57,12 @@ public class CareService {
         // LLM 프롬프트 생성 및 답변 도출
         OwnedProduct ownedProduct = getOwnedProductForMember(memberId, userProductId);
         String productContext = productPromptContextBuilder.buildOwnedProductContext(userProductId, ownedProduct);
+        String weatherContext = buildWeatherContext();
         String history = buildHistoryContext(session.getId());
         String prompt = """
                 당신은 사용자가 보유한 MCM 명품/패션 제품의 AI CARE 상담사입니다.
                 아래 보유 상품, 상품, 소재 정보는 답변의 내부 참고 자료입니다.
+                현재 날씨 정보가 제공된 경우, 습도/비/눈/뇌우/기온 관련 질문에는 그 값을 활용해서 답하세요.
                 고객에게 "DB", "데이터베이스", "근거 자료", "확인된 정보" 같은 내부 표현을 말하지 마세요.
                 careInfo와 소재 테이블의 careSummary, cleaningMethod, storageMethod, avoidList, waterWarning, repairRecommendation을 우선 반영하세요.
                 purchasedAt, status, productType, color, size, styleTypes까지 종합해서 사용자가 바로 실행할 수 있는 관리 조언으로 풀어주세요.
@@ -71,11 +76,13 @@ public class CareService {
 
                 %s
 
+                %s
+
                 [대화 기록]
                 %s
 
                 사용자: %s
-                """.formatted(productContext, history, request.getMessage());
+                """.formatted(productContext, weatherContext, history, request.getMessage());
         String reply = llmClient.ask(prompt);
 
         // AI 답변 메시지 저장
@@ -103,7 +110,7 @@ public class CareService {
 
         if ("WEATHER_ALERT".equals(triggerType)) {
             // 서울 기준 좌표 (37.5665, 126.9780) 호출 (필요시 request에서 위경도 파라미터를 받아와 넘길 수도 있습니다)
-            WeatherInfo weather = weatherApiService.getWeather(37.5665, 126.9780);
+            WeatherInfo weather = weatherApiService.getWeather(SEOUL_LATITUDE, SEOUL_LONGITUDE);
 
             // 실시간 날씨 정보를 동적으로 반영한 메시지 생성
             triggerContext = String.format(
@@ -139,6 +146,20 @@ public class CareService {
         chatRepository.save(new ChatMessage(initialMessage, "ASSISTANT", session));
 
         return ChatResponse.ofInit(session.getId(), initialMessage);
+    }
+
+    private String buildWeatherContext() {
+        try {
+            WeatherInfo weather = weatherApiService.getWeather(SEOUL_LATITUDE, SEOUL_LONGITUDE);
+            return """
+                    [현재 날씨]
+                    날씨: %s
+                    기온: %.1f°C
+                    습도: %d%%
+                    """.formatted(weather.weatherText(), weather.temperature(), weather.humidity());
+        } catch (RuntimeException exception) {
+            return "";
+        }
     }
 
     private Notification getNotificationForInit(Long memberId, Long userProductId, Long notificationId) {

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api/transfers")
+@RequestMapping({"/transfers", "/api/transfers"})
 public class TransferController {
 
     private final TransferService transferService;
